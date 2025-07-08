@@ -4,11 +4,12 @@ import pandas as pd
 import os
 import datetime
 import numpy as np
+import time
 
 logging.basicConfig(level=logging.INFO)
 
-api_key = "Enter the API key"
-api_secret = "Enter the API secret"
+api_key = " Enter here "
+api_secret = " Enter here "
 access_token_file = "access_token.txt"
 
 kite = KiteConnect(api_key=api_key)
@@ -37,8 +38,23 @@ if not set_access_token_from_file():
         f.write(access_token)
     logging.info("Access token saved to access_token.txt")
 
-# Load instruments once
-instruments = pd.read_csv("instruments.csv")
+# Load instruments.csv, refresh if older than 12 hours
+def get_instrument_list(local_file="instruments.csv", url="https://api.kite.trade/instruments", max_age_hours=12):
+    if os.path.exists(local_file):
+        file_age = (time.time() - os.path.getmtime(local_file)) / 3600
+        if file_age < max_age_hours:
+            logging.info(f"Using cached instruments file ({local_file}), age: {file_age:.2f} hours.")
+            return pd.read_csv(local_file)
+        else:
+            logging.info(f"Cached instruments file is older than {max_age_hours} hours. Downloading new file...")
+    else:
+        logging.info("No cached instruments file found. Downloading new file...")
+    df = pd.read_csv(url)
+    df.to_csv(local_file, index=False)
+    return df
+
+# Use the function to load instruments
+instruments = get_instrument_list()
 
 # Get BANKNIFTY index LTP
 idx_row = instruments[(instruments['segment'] == 'INDICES') & (instruments['name'] == 'NIFTY BANK')]
