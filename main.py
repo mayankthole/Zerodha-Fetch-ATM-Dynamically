@@ -7,8 +7,8 @@ import numpy as np
 
 logging.basicConfig(level=logging.INFO)
 
-api_key = "dkae5abnsn99r5qm"
-api_secret = "xc271bh072g9q2v4e03onkjvbhjbbyta"
+api_key = "Enter the API key"
+api_secret = "Enter the API secret"
 access_token_file = "access_token.txt"
 
 kite = KiteConnect(api_key=api_key)
